@@ -1,0 +1,24 @@
+{
+  "id": "memory-continuity",
+  "name": "Memory Continuity",
+  "description": "Audience-aware episodic continuity across OpenClaw sessions and surfaces.",
+  "activation": {
+    "onStartup": true
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "agentId": { "type": "string" },
+      "storePath": { "type": "string" },
+      "identitiesPath": { "type": "string" },
+      "maxAgeHours": { "type": "number", "minimum": 1, "maximum": 720 },
+      "maxEvents": { "type": "integer", "minimum": 10, "maximum": 10000 },
+      "retrieveLimit": { "type": "integer", "minimum": 1, "maximum": 20 },
+      "emailSessions": {
+        "type": "object",
+        "additionalProperties": { "type": "string" }
+      }
+    }
+  }
+}

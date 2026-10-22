@@ -1,0 +1,5 @@
+node_modules/
+*.log
+*.jsonl
+continuity-identities.json
+.DS_Store

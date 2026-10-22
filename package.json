@@ -1,0 +1,26 @@
+{
+  "name": "openclaw-memory-continuity",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Audience-aware continuity between OpenClaw sessions and surfaces",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jasonacox-sam/openclaw-memory-continuity.git"
+  },
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run build && node --test"
+  },
+  "peerDependencies": {
+    "openclaw": ">=2026.7.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0"
+  },
+  "openclaw": {
+    "extensions": ["./dist/index.js"]
+  }
+}
