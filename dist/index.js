@@ -13,6 +13,9 @@ function readConfig(value) {
         maxAgeHours: typeof value.maxAgeHours === "number" ? value.maxAgeHours : 72,
         maxEvents: typeof value.maxEvents === "number" ? value.maxEvents : 500,
         retrieveLimit: typeof value.retrieveLimit === "number" ? value.retrieveLimit : 6,
+        surfaces: Array.isArray(value.surfaces)
+            ? value.surfaces.filter((surface) => ["telegram", "minecraft", "email"].includes(String(surface)))
+            : ["telegram", "minecraft"],
         emailSessions: value.emailSessions && typeof value.emailSessions === "object" && !Array.isArray(value.emailSessions)
             ? value.emailSessions
             : {},

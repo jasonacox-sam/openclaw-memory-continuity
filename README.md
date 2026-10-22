@@ -50,10 +50,15 @@ configure `plugins.entries.memory-continuity`:
     "maxAgeHours": 72,
     "maxEvents": 500,
     "retrieveLimit": 6,
+    "surfaces": ["telegram", "minecraft"],
     "emailSessions": {}
   }
 }
 ```
+
+`surfaces` defaults to `telegram` and `minecraft`. Email continuity is opt-in:
+add `email` to the list and configure only session fragments that represent
+real correspondence—not cron or task-runner sessions.
 
 Identity file example:
 
@@ -93,3 +98,17 @@ npm test
 The tests cover cross-session retrieval, exact whisper audiences, group
 audience-subset enforcement, Minecraft prompt minimization, unmapped identity
 rejection, and malformed-store fail-open behavior.
+
+## Legacy migration
+
+The migration helper keeps only Telegram and Minecraft events, repairs legacy
+Minecraft whisper audiences, removes bridge state/instructions, and
+deduplicates exact records. It is dry-run by default and never overwrites an
+existing output file.
+
+```bash
+npm run migrate:legacy -- /path/to/events.jsonl
+npm run migrate:legacy -- /path/to/events.jsonl /path/to/events.cleaned.jsonl --write
+```
+
+Set `MC_AGENT_ID` only when the store uses an agent identity other than `sam`.

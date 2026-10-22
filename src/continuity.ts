@@ -7,6 +7,7 @@ export type ContinuityConfig = {
   maxAgeHours: number;
   maxEvents: number;
   retrieveLimit: number;
+  surfaces?: Array<"telegram" | "minecraft" | "email">;
   emailSessions: Record<string, string>;
 };
 
@@ -30,6 +31,11 @@ type IdentityRegistry = {
 };
 
 const MAX_EVENT_CHARS = 1600;
+const DEFAULT_SURFACES = ["telegram", "minecraft"];
+
+function surfaceEnabled(config: ContinuityConfig, surface: "telegram" | "minecraft" | "email"): boolean {
+  return (config.surfaces ?? DEFAULT_SURFACES).includes(surface);
+}
 
 function identities(config: ContinuityConfig): IdentityRegistry {
   try {
@@ -92,7 +98,7 @@ function minecraftUtterance(prompt: string): string {
 
 export function describeSession(config: ContinuityConfig, sessionKey: string, prompt = "", senderId = "") {
   const registry = identities(config);
-  if (sessionKey.includes(":minecraft:")) {
+  if (surfaceEnabled(config, "minecraft") && sessionKey.includes(":minecraft:")) {
     const usernames = minecraftPlayers(prompt);
     const speakerName = usernames[0];
     const speaker = speakerName ? registry.minecraft?.[speakerName] : undefined;
@@ -106,13 +112,13 @@ export function describeSession(config: ContinuityConfig, sessionKey: string, pr
     const participants = uniq([config.agentId, ...people]);
     return { surface: "minecraft", speaker, participants, audience: participants, privacy: "shared" as const };
   }
-  if (sessionKey.includes(":telegram:") && sessionKey.includes(":direct:")) {
+  if (surfaceEnabled(config, "telegram") && sessionKey.includes(":telegram:") && sessionKey.includes(":direct:")) {
     const id = senderId || sessionKey.split(":").at(-1) || "unknown";
     const person = registry.telegram?.[id];
     if (!person) return null;
     return { surface: "telegram", speaker: person, participants: [config.agentId, person], audience: [config.agentId, person], privacy: "private" as const };
   }
-  for (const [sessionFragment, person] of Object.entries(config.emailSessions)) {
+  for (const [sessionFragment, person] of surfaceEnabled(config, "email") ? Object.entries(config.emailSessions) : []) {
     if (sessionKey.includes(sessionFragment)) {
       return { surface: "email", speaker: person, participants: [config.agentId, person], audience: [config.agentId, person], privacy: "private" as const };
     }
@@ -121,7 +127,9 @@ export function describeSession(config: ContinuityConfig, sessionKey: string, pr
 }
 
 export function isContinuitySession(config: ContinuityConfig, sessionKey: string): boolean {
-  return sessionKey.includes(":direct:") || Object.keys(config.emailSessions).some((fragment) => sessionKey.includes(fragment));
+  if (surfaceEnabled(config, "minecraft") && sessionKey.includes(":minecraft:") && sessionKey.includes(":direct:")) return true;
+  if (surfaceEnabled(config, "telegram") && sessionKey.includes(":telegram:") && sessionKey.includes(":direct:")) return true;
+  return surfaceEnabled(config, "email") && Object.keys(config.emailSessions).some((fragment) => sessionKey.includes(fragment));
 }
 
 function eventId(event: Omit<ContinuityEvent, "id" | "at">): string {

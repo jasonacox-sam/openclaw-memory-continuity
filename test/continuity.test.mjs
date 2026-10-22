@@ -77,6 +77,14 @@ test('rejects unmapped Minecraft and Telegram identities', () => {
   assert.equal(memory.describeSession(config, 'agent:main:telegram:direct:999', 'hello', '999'), null)
 })
 
+test('enables only Telegram and Minecraft by default, with email opt-in', () => {
+  const config = fixture()
+  config.emailSessions = { 'cron:mail-watch': 'owner' }
+  assert.equal(memory.isContinuitySession(config, 'agent:main:cron:mail-watch'), false)
+  config.surfaces = ['telegram', 'minecraft', 'email']
+  assert.equal(memory.isContinuitySession(config, 'agent:main:cron:mail-watch'), true)
+})
+
 test('malformed stores fail open', () => {
   const config = fixture()
   writeFileSync(config.storePath, '{not-json}\n')
